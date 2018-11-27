@@ -1,0 +1,54 @@
+<html>
+<head>
+    <title>Transloc Take Home</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+        integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+        crossorigin=""></script>
+    <script type='text/javascript' src='https://code.jquery.com/jquery-3.3.1.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+    <style type="text/css">
+        html, body, #map{
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></map>
+
+    <script type="text/javascript">
+        var map = L.map('map').setView([35.944730,-78.706030],3);
+        L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {attribution: 'OSM'}).addTo(map);
+        var heat = L.heatLayer([], {maxZoom: 10}).addTo(map);
+
+        function updateHeat() {
+            $.ajax({
+                type: "GET",
+                url: "https://enigmatic-wildwood-58658.herokuapp.com/ipv6latlngs",
+                data: {},
+                success: function(response){
+                    var points = [];
+                    for (var i = 0; i < response.points.length; i++) {
+                        var quantity = response.points[i][2]
+                        var latlong = [response.points[i][0], response.points[i][1]]
+                        for (var j = 0; j < quantity; j++) {
+                            points.push(latlong)
+                        }
+                    }
+                    heat.setLatLngs(points);
+                },
+                error: function(err){
+                    console.log("Error with ipv6latlongs: " + err.status + ", " + err.statusText);
+                }
+            });
+        }
+
+        updateHeat();			
+    </script>
+</body>
+</html>
